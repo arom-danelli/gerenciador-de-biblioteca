@@ -1,5 +1,6 @@
 package com.elotech.biblioteca_arom.entities;
 
+import com.elotech.biblioteca_arom.entities.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,16 +21,21 @@ public class Loan implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
-    private Long user_id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private Long book_id;
+    @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
     @Column(nullable = false)
     private LocalDate loan_date;
 
+    @Column
+    private LocalDate return_date;
 
-//○ Data de empréstimo não pode ser maior que o dia atual.
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
 }

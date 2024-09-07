@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,5 +36,7 @@ public class Book implements Serializable {
     @Column(nullable = false)
     private String category;
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<Loan> loans;
 
 }

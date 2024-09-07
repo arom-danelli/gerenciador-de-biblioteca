@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class BookService {
     private final BookRepository bookRepository;
@@ -40,11 +42,19 @@ public class BookService {
         existingBook.setCategory(updateBook.getCategory());
         return bookRepository.save(existingBook);
 
-
     }
 
     // DELETE
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    public boolean hasActiveLoan(Long bookId) {
+        Optional<Book> bookOptional = bookRepository.findById(bookId);
+        if (bookOptional.isPresent()) {
+            Book book = bookOptional.get();
+            return book.getLoans().stream().anyMatch(loan -> loan.getReturn_date() == null);
+        }
+        throw new RuntimeException("Livro não encontrado!");
     }
 }

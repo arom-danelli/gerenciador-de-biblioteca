@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,8 +34,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String phoneNumber;
 
-
-//○ Validar se email está correto.
-//○ A data de cadastro não pode ser maior que o dia atual.
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Loan> loans;
 
 }
