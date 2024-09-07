@@ -17,6 +17,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes para a classe UserService, cobrindo as operações de criação, consulta,
+ * atualização e exclusão de usuários.
+ */
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
@@ -28,6 +32,9 @@ public class UserServiceTest {
 
     private User user;
 
+    /**
+     * Método que inicializa o objeto User antes de cada teste.
+     */
     @BeforeEach
     void setUp() {
         user = new User();
@@ -38,6 +45,10 @@ public class UserServiceTest {
         user.setPhoneNumber("123456789");
     }
 
+    /**
+     * Testa a criação de um usuário.
+     * Verifica se o usuário é salvo corretamente e se o nome é atribuído.
+     */
     @Test
     public void testCreateUser() {
         when(userRepository.save(user)).thenReturn(user);
@@ -49,6 +60,10 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(user);
     }
 
+    /**
+     * Testa a criação de um usuário com um e-mail inválido.
+     * Verifica se a exceção correta é lançada e se o usuário não é salvo.
+     */
     @Test
     public void testCreateUserWithInvalidEmail() {
         user.setEmail("invalid-email");
@@ -61,18 +76,26 @@ public class UserServiceTest {
         verify(userRepository, never()).save(any(User.class));
     }
 
+    /**
+     * Testa a criação de um usuário com uma data de cadastro futura.
+     * Verifica se a exceção correta é lançada e se o usuário não é salvo.
+     */
     @Test
     public void testCreateUserWithFutureRegistrationDate() {
-        user.setRegistrationDate(LocalDate.now().plusDays(1)); // Data futura
+        user.setRegistrationDate(LocalDate.now().plusDays(1));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
             userService.createUser(user);
         });
 
         assertEquals("Data de cadastro não pode ser maior que o dia atual!", exception.getMessage());
-        verify(userRepository, never()).save(any(User.class)); // Certifica que o método save não foi chamado
+        verify(userRepository, never()).save(any(User.class));
     }
 
+    /**
+     * Testa a recuperação de todos os usuários.
+     * Verifica se a lista de usuários é retornada corretamente.
+     */
     @Test
     public void testGetAllUsers() {
         User user2 = new User();
@@ -88,6 +111,10 @@ public class UserServiceTest {
         assertEquals("User 2", result.get(1).getName());
     }
 
+    /**
+     * Testa a recuperação de um usuário por ID.
+     * Verifica se o usuário é encontrado corretamente e se os dados correspondem ao esperado.
+     */
     @Test
     public void testGetUserById() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -99,6 +126,10 @@ public class UserServiceTest {
         assertEquals("Test User", foundUser.getName());
     }
 
+    /**
+     * Testa a recuperação de um usuário por ID quando ele não é encontrado.
+     * Verifica se a exceção correta é lançada.
+     */
     @Test
     public void testGetUserByIdNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
@@ -110,6 +141,10 @@ public class UserServiceTest {
         assertEquals("Usuário não foi encontrado!", exception.getMessage());
     }
 
+    /**
+     * Testa a atualização de um usuário existente.
+     * Verifica se os dados do usuário são atualizados corretamente.
+     */
     @Test
     public void testUpdateUser() {
         User updatedUser = new User();
@@ -130,6 +165,10 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(user);
     }
 
+    /**
+     * Testa a exclusão de um usuário.
+     * Verifica se o método de exclusão foi chamado no repositório.
+     */
     @Test
     public void testDeleteUser() {
         doNothing().when(userRepository).deleteById(1L);

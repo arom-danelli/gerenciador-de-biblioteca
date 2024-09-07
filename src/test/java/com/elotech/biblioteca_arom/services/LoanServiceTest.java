@@ -20,6 +20,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes para a classe LoanService, cobrindo as operações de criação, atualização,
+ * consulta e exclusão de empréstimos.
+ */
 @ExtendWith(MockitoExtension.class)
 public class LoanServiceTest {
 
@@ -36,6 +40,11 @@ public class LoanServiceTest {
     private final Book book = new Book(1L, "Neon Genesis Evangelion", "Hideaki Anno", "123456789", "1994-12-26", "Fiction", null);
     private final Loan loan = new Loan(1L, user, book, LocalDate.of(2023, 9, 1), null, Status.EMPRESTADO);
 
+    /**
+     * Testa a criação de um empréstimo quando o livro ainda não foi emprestado.
+     * Verifica se o status do empréstimo é definido como 'EMPRESTADO' e se
+     * não há data de devolução atribuída.
+     */
     @Test
     public void testCreateLoan_whenBookIsNotLoaned() {
         when(bookService.hasActiveLoan(book.getId())).thenReturn(false);
@@ -51,6 +60,10 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).save(loan);
     }
 
+    /**
+     * Testa a criação de um empréstimo quando o livro já está emprestado.
+     * Verifica se o sistema lança uma exceção ao tentar criar o empréstimo.
+     */
     @Test
     public void testCreateLoan_whenBookIsAlreadyLoaned() {
         when(bookService.hasActiveLoan(book.getId())).thenReturn(true);
@@ -61,6 +74,24 @@ public class LoanServiceTest {
         verify(loanRepository, never()).save(any(Loan.class));
     }
 
+    /**
+     * Testa a criação de um empréstimo quando a data de empréstimo é maior que o dia atual.
+     * Verifica se o sistema lança uma exceção para garantir que a data de empréstimo é válida.
+     */
+    @Test
+    public void testCreateLoan_whenLoanDateIsInFuture() {
+        loan.setLoan_date(LocalDate.now().plusDays(1));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> loanService.createLoan(loan));
+
+        assertEquals("A data de empréstimo não pode ser maior que o dia atual!", exception.getMessage());
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    /**
+     * Testa a atualização de um empréstimo fornecendo a data de devolução.
+     * Verifica se o status e a data de devolução são atualizados corretamente.
+     */
     @Test
     public void testUpdateLoan_whenReturnDateIsProvided() {
         when(loanRepository.findById(loan.getId())).thenReturn(Optional.of(loan));
@@ -81,7 +112,10 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).save(loan);
     }
 
-
+    /**
+     * Testa a recuperação de todos os empréstimos.
+     * Verifica se a lista de empréstimos é retornada corretamente.
+     */
     @Test
     public void testGetAllLoans() {
         Loan loan1 = new Loan(1L, user, book, LocalDate.of(2023, 9, 1), null, Status.EMPRESTADO);
@@ -96,6 +130,10 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).findAll();
     }
 
+    /**
+     * Testa a recuperação de empréstimos por usuário.
+     * Verifica se a lista de empréstimos de um usuário específico é retornada corretamente.
+     */
     @Test
     public void testGetLoansByUser() {
         when(loanRepository.findByUserId(user.getId())).thenReturn(Collections.singletonList(loan));
@@ -107,6 +145,10 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).findByUserId(user.getId());
     }
 
+    /**
+     * Testa a exclusão de um empréstimo.
+     * Verifica se o empréstimo é removido corretamente do repositório.
+     */
     @Test
     public void testDeleteLoan() {
         Long loanId = 1L;
@@ -121,3 +163,4 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).deleteById(loanId);
     }
 }
+
