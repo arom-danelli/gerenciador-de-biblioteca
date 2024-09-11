@@ -1,5 +1,6 @@
 package com.elotech.biblioteca_arom.services;
 
+import com.elotech.biblioteca_arom.clients.GoogleBooksClient;
 import com.elotech.biblioteca_arom.entities.Book;
 import com.elotech.biblioteca_arom.repositories.BookRepository;
 import org.junit.jupiter.api.Test;
@@ -8,9 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,9 +23,12 @@ public class BookServiceTest {
 
     @Mock
     private BookRepository bookRepository;
-
+    @Mock
+    private GoogleBooksClient googleBooksClient;
     @InjectMocks
     private BookService bookService;
+    @InjectMocks
+    private GoogleBooksService googleBooksService;
 
     /**
      * Testa a criação de um livro.
@@ -123,5 +125,32 @@ public class BookServiceTest {
         bookService.deleteBook(bookId);
 
         verify(bookRepository, times(1)).deleteById(bookId);
+    }
+
+    /**
+     * Testa a busca de livros por título na API do Google Books.
+     * Simula a resposta da API e verifica se o serviço processa corretamente os dados.
+     * Verifica se o título e o autor do livro retornado são os esperados.
+     */
+    @Test
+    public void testSearchBooks() {
+        Map<String, Object> googleApiResponse = new HashMap<>();
+        Map<String, Object> volumeInfo = new HashMap<>();
+        volumeInfo.put("title", "Effective Java");
+        volumeInfo.put("authors", List.of("Joshua Bloch"));
+        volumeInfo.put("publishedDate", "2008");
+        volumeInfo.put("industryIdentifiers", List.of(Map.of("identifier", "0321356683")));
+        volumeInfo.put("categories", List.of("Programming"));
+
+        googleApiResponse.put("items", List.of(Map.of("volumeInfo", volumeInfo)));
+
+        when(googleBooksClient.searchBooks("Effective Java")).thenReturn(googleApiResponse);
+
+        List<Book> books = googleBooksService.searchBooks("Effective Java");
+
+        assertNotNull(books);
+        assertEquals(1, books.size());
+        assertEquals("Effective Java", books.getFirst().getTitle());
+        assertEquals("Joshua Bloch", books.getFirst().getAuthor());
     }
 }

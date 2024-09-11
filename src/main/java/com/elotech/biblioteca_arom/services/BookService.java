@@ -1,6 +1,8 @@
 package com.elotech.biblioteca_arom.services;
 
 import com.elotech.biblioteca_arom.entities.Book;
+import com.elotech.biblioteca_arom.entities.Loan;
+import com.elotech.biblioteca_arom.entities.enums.Status;
 import com.elotech.biblioteca_arom.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,7 @@ public class BookService {
         existingBook.setAuthor(updateBook.getAuthor());
         existingBook.setIsbn(updateBook.getIsbn());
         existingBook.setCategory(updateBook.getCategory());
+        existingBook.setThumbnail_url(updateBook.getThumbnail_url());
         return bookRepository.save(existingBook);
     }
 
@@ -85,19 +88,4 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
-    /**
-     * Verifica se um livro específico possui um empréstimo ativo (não devolvido).
-     *
-     * @param bookId o ID do livro a ser verificado
-     * @return true se o livro tiver um empréstimo ativo, false caso contrário
-     * @throws RuntimeException se o livro não for encontrado
-     */
-    public boolean hasActiveLoan(Long bookId) {
-        Optional<Book> bookOptional = bookRepository.findById(bookId);
-        if (bookOptional.isPresent()) {
-            Book book = bookOptional.get();
-            return book.getLoans().stream().anyMatch(loan -> loan.getReturn_date() == null);
-        }
-        throw new RuntimeException("Livro não encontrado!");
-    }
-}
+ }

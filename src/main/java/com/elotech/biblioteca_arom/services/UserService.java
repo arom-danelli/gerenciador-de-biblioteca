@@ -37,6 +37,11 @@ public class UserService {
      */
     public User createUser(User user) {
         validateEmail(user.getEmail());
+
+        if (user.getRegistrationDate() == null) {
+            user.setRegistrationDate(LocalDate.now());
+        }
+
         validateRegistrationDate(user.getRegistrationDate());
         return userRepository.save(user);
     }

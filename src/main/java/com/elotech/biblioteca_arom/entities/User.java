@@ -1,5 +1,6 @@
 package com.elotech.biblioteca_arom.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,6 @@ public class User implements Serializable {
     private String phoneNumber;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "user-loans")
     private List<Loan> loans;
-
 }

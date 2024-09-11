@@ -1,5 +1,7 @@
 package com.elotech.biblioteca_arom.services;
 
+import com.elotech.biblioteca_arom.clients.GoogleBooksClient;
+import com.elotech.biblioteca_arom.entities.Book;
 import com.elotech.biblioteca_arom.entities.User;
 import com.elotech.biblioteca_arom.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

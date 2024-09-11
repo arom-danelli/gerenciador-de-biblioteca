@@ -1,6 +1,9 @@
 package com.elotech.biblioteca_arom.controllers;
 
+import com.elotech.biblioteca_arom.dtos.LoanDTO;
+import com.elotech.biblioteca_arom.entities.Book;
 import com.elotech.biblioteca_arom.entities.Loan;
+import com.elotech.biblioteca_arom.entities.enums.Status;
 import com.elotech.biblioteca_arom.services.LoanService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +38,13 @@ public class LoanController {
      * @return uma resposta HTTP com o empréstimo criado e status 201 (Created)
      */
     @PostMapping
-    public ResponseEntity<Loan> createLoan(@RequestBody Loan loan) {
-        Loan createdLoan = loanService.createLoan(loan);
-        return new ResponseEntity<>(createdLoan, HttpStatus.CREATED);
+    public ResponseEntity<?> createLoan(@RequestBody Loan loan) {
+        try {
+            Loan createdLoan = loanService.createLoan(loan);
+            return new ResponseEntity<>(createdLoan, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**
@@ -48,11 +55,18 @@ public class LoanController {
      * @return uma resposta HTTP com o empréstimo atualizado e status 200 (OK)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Loan> updateLoan(@PathVariable Long id, @RequestParam("returnDate") String returnDateStr) {
+    public ResponseEntity<Loan> updateLoan(
+            @PathVariable Long id,
+            @RequestParam("returnDate") String returnDateStr,
+            @RequestParam(value = "status", required = false) String statusStr) {
+
         LocalDate returnDate = LocalDate.parse(returnDateStr);
-        Loan updatedLoan = loanService.updateLoan(id, returnDate);
+        Status status = (statusStr != null) ? Status.valueOf(statusStr) : null;
+
+        Loan updatedLoan = loanService.updateLoan(id, returnDate, status);
         return ResponseEntity.ok(updatedLoan);
     }
+
 
     /**
      * Retorna uma lista de todos os empréstimos cadastrados.
@@ -60,9 +74,9 @@ public class LoanController {
      * @return uma lista de empréstimos
      */
     @GetMapping
-    public ResponseEntity<List<Loan>> getAllLoans() {
-        List<Loan> loans = loanService.getAllLoans();
-        return ResponseEntity.ok(loans);
+    public ResponseEntity<List<LoanDTO>> getAllLoans() {
+        List<LoanDTO> loanDetails = loanService.getAllLoanDetails();
+        return ResponseEntity.ok(loanDetails);
     }
 
     /**
@@ -87,6 +101,21 @@ public class LoanController {
     public ResponseEntity<List<Loan>> getLoansByBook(@PathVariable Long bookId) {
         List<Loan> bookLoans = loanService.getLoansByBook(bookId);
         return ResponseEntity.ok(bookLoans);
+    }
+
+    /**
+     * Endpoint para recomendar livros com base nas categorias dos livros que o usuário já emprestou.
+     * O sistema verifica quais categorias de livros o usuário já emprestou e, a partir disso,
+     * recomenda livros da mesma categoria que ele ainda não pegou emprestado.
+     *
+     * @param userId o ID do usuário para o qual as recomendações serão geradas
+     * @return ResponseEntity contendo uma lista de objetos Book recomendados ao usuário
+     *         e o status HTTP 200 (OK) se as recomendações forem geradas com sucesso.
+     */
+    @GetMapping("/recomendations/{userId}")
+    public ResponseEntity<List<Book>> recomendBooks(@PathVariable Long userId) {
+        List<Book> recomendations = loanService.recomendBooksForUser(userId);
+        return ResponseEntity.ok(recomendations);
     }
 
     /**

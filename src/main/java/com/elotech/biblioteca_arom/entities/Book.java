@@ -1,5 +1,6 @@
 package com.elotech.biblioteca_arom.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +37,10 @@ public class Book implements Serializable {
     @Column(nullable = false)
     private String category;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Loan> loans;
+    @Column(nullable = true)
+    private String thumbnail_url;
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "book-loans")
+    private List<Loan> loans;
 }
